@@ -1,40 +1,60 @@
-import { AntDesign } from '@expo/vector-icons'
-import { Href, useRouter } from 'expo-router'
-import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { useMMKVBoolean } from 'react-native-mmkv'
-import Animated, { Easing, SlideInLeft } from 'react-native-reanimated'
+import { View, StyleSheet } from 'react-native'
 
-import { AppSettings } from '@lib/constants/GlobalValues'
-import { useAppMode } from '@lib/state/AppMode'
+import { ThemedText } from '@components/ThemedText'
+import ThemedIcon from '@components/ThemedIcon'
 import { Theme } from '@lib/theme/ThemeManager'
+import Drawer from '@components/views/Drawer'
 
-type ButtonData = {
-    name: string
-    path: Href
-    icon?: keyof typeof AntDesign.glyphMap
-}
+// 菜单列表（这里就是侧边栏的所有文字）
+const ROUTES = [
+    { name: '采样器', icon: 'tune', route: 'AppSettings', params: { screen: 'SamplerSettings' } },
+    { name: '格式设置', icon: 'format-list-bulleted', route: 'AppSettings', params: { screen: 'FormattingSettings' } },
+    { name: '模型管理', icon: 'storage', route: 'ModelManager' },
+    { name: '语音合成', icon: 'volume-high', route: 'AppSettings', params: { screen: 'TTSSettings' } },
+    { name: '日志', icon: 'list-alt', route: 'Logs' },
+    { name: '关于', icon: 'info', route: 'About' },
+    { name: '设置', icon: 'cog', route: 'AppSettings' },
+]
 
-type DrawerButtonProps = {
-    item: ButtonData
-    index: number
-}
+const RouteList = () => {
+    const { color, spacing } = Theme.useTheme()
 
-const DrawerButton = ({ item, index }: DrawerButtonProps) => {
-    const styles = useStyles()
-    const router = useRouter()
-    const { color } = Theme.useTheme()
     return (
-        <Animated.View
-            key={index}
-            entering={SlideInLeft.duration(500 + index * 30)
-                .withInitialValues({ originX: index * -150 + -400 })
-                .easing(Easing.out(Easing.exp))}>
-            <TouchableOpacity
-                style={styles.largeButton}
-                onPress={() => {
-                    router.push(item.path)
-                }}>
-                <AntDesign size={24} name={item.icon ?? 'question'} color={color.text._400} />
+        <View style={styles.container}>
+            {ROUTES.map((route) => (
+                <Drawer.Button
+                    key={route.name}
+                    onPress={() => Drawer.useDrawerStore.getState().close(Drawer.ID.SETTINGS)}
+                    route={route}
+                    style={styles.button}>
+                    <ThemedIcon name={route.icon} size={24} color={color.text._200} />
+                    <ThemedText style={[styles.text, { color: color.text._200 }]}>
+                        {route.name}
+                    </ThemedText>
+                </Drawer.Button>
+            ))}
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        gap: 4,
+    },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+    },
+    text: {
+        fontSize: 16,
+    },
+})
+
+export default RouteList                <AntDesign size={24} name={item.icon ?? 'question'} color={color.text._400} />
                 <Text style={styles.largeButtonText}>{item.name}</Text>
             </TouchableOpacity>
         </Animated.View>
